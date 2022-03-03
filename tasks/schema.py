@@ -2,7 +2,7 @@ import graphene
 from graphene_django import DjangoObjectType
 from .models import Task
 
-STATUSES = ["later", "doing", "done"]
+STATUSES = [None, "later", "doing", "done"]
 
 class TaskType(DjangoObjectType):
     class Meta:
@@ -28,7 +28,10 @@ class CreateTaskMutation(graphene.Mutation):
 
     def mutate(self, info, text, status):
         if status in STATUSES:
-            task = Task(text=text, status=status)
+            if status:
+                task = Task(text=text, status=status)
+            else:
+                task = Task(text=text, status="later")
             task.save()
             return CreateTaskMutation(task=task)
         else:
@@ -48,7 +51,8 @@ class EditTaskMutation(graphene.Mutation):
         if status in STATUSES:
             task = Task.objects.get(pk=id)
             task.text = text
-            task.status = status
+            if status:
+                task.status = status
             task.save()
             return EditTaskMutation(task=task)
         else:
