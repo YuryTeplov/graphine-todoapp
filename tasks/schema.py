@@ -41,7 +41,7 @@ class CreateTaskMutation(graphene.Mutation):
 
 class EditTaskMutation(graphene.Mutation):
     class Arguments:
-        id = graphene.ID()
+        id = graphene.ID(required=True)
         text = graphene.String()
         status = graphene.String()
 
@@ -50,7 +50,8 @@ class EditTaskMutation(graphene.Mutation):
     def mutate(self, info, id, text, status):
         if status in STATUSES:
             task = Task.objects.get(pk=id)
-            task.text = text
+            if text:
+                task.text = text
             if status:
                 task.status = status
             task.save()
